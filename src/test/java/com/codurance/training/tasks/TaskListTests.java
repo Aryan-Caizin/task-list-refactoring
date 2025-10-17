@@ -16,7 +16,7 @@ public class TaskListTests {
         taskList.execute("add task caizin Task1");
         taskList.execute("show");
 
-        String expected = "caizin\n" + "[ ] 1: Task1" + "\r\n";
+        String expected = "caizin\n[ ] 1: Task1\n"; // use \n instead of \r\n
         assertEquals(expected, writer.toString());
     }
 
@@ -29,7 +29,7 @@ public class TaskListTests {
         taskList.execute("add task caizin Task2");
         taskList.execute("show");
 
-        String expected = "caizin\n" + "[ ] 1: Task1" + "\r\n" + "[ ] 2: Task2" + "\r\n";
+        String expected = "caizin\n[ ] 1: Task1\n[ ] 2: Task2\n"; // use \n instead of \r\n
         assertEquals(expected, writer.toString());
     }
 }

@@ -2,10 +2,7 @@ package com.codurance.training.tasks;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.System.out;
 
@@ -41,13 +38,7 @@ public final class TaskList {
     }
 
     private void show() throws IOException {
-        for (Map.Entry<String, List<com.codurance.training.tasks.Task>> project : tasks.entrySet()) {
-            writer.write(project.getKey());
-            writer.write("\n");
-            for (com.codurance.training.tasks.Task task : project.getValue()) {
-                writer.write(String.format("[%c] %d: %s%n", (task.isDone() ? 'x' : ' '), task.getId(), task.getDescription()));
-            }
-        }
+        void extracted = Tasks.extracted(writer, tasks.entrySet());
     }
 
     private void add(String commandLine) {
@@ -84,12 +75,7 @@ public final class TaskList {
     private void setDone(String idString, boolean done) {
         int id = Integer.parseInt(idString);
         for (Map.Entry<String, List<com.codurance.training.tasks.Task>> project : tasks.entrySet()) {
-            for (com.codurance.training.tasks.Task task : project.getValue()) {
-                if (task.getId() == id) {
-                    task.setDone(done);
-                    return;
-                }
-            }
+            if (Task.extracted(done, project, id)) return;
         }
         out.printf("Could not find a task with an ID of %d.", id);
         out.println();
