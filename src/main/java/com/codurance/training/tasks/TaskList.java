@@ -1,87 +1,63 @@
 package com.codurance.training.tasks;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-import static java.lang.System.out;
-
 public final class TaskList {
 
-    private final Map<String, List<Task>> tasks = new LinkedHashMap<>();
+    private final Project projects = new Project();
     private final Writer writer;
     private long lastId = 0;
 
+
+    private final Map<String, Command> commands = new HashMap<>();
+
     public TaskList(Writer writer) {
         this.writer = writer;
+        commands.put("show", new ShowCommand(this));
+        commands.put("add", new AddCommand(this));
+        commands.put("check", new CheckCommand(this, true));
+        commands.put("uncheck", new CheckCommand(this, false));
     }
 
     public void execute(String commandLine) throws Exception {
-        String[] commandRest = commandLine.split(" ", 2);
-        String command = commandRest[0];
-        switch (command) {
-            case "show":
-                show();
-                break;
-            case "add":
-                add(commandRest[1]);
-                break;
-            case "check":
-                check(commandRest[1]);
-                break;
-            case "uncheck":
-                uncheck(commandRest[1]);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown command: " + command);
+        String[] parts = commandLine.split(" ", 2);
+        String commandName = parts[0];
+        String arguments = parts.length > 1 ? parts[1] : "";
+
+        Command cmd = commands.get(commandName);
+        if (cmd == null) {
+            throw new IllegalArgumentException("Unknown command: " + commandName);
         }
+        cmd.execute(arguments);
     }
 
-    private void show() throws IOException {
-        void extracted = Tasks.extracted(writer, tasks.entrySet());
+    void show() throws IOException {
+       // Project project = new Project(tasks);
+        projects.format( writer);
     }
 
-    private void add(String commandLine) {
-        String[] subcommandRest = commandLine.split(" ", 2);
-        String subcommand = subcommandRest[0];
-        if (subcommand.equals("project")) {
-            addProject(subcommandRest[1]);
-        } else if (subcommand.equals("task")) {
-            String[] projectTask = subcommandRest[1].split(" ", 2);
-            addTask(projectTask[0], projectTask[1]);
-        }
+
+    void addProject(String name) {
+        projects.addProjectName(name);
     }
 
-    private void addProject(String name) {
-        tasks.put(name, new ArrayList<>());
-    }
-
-    private void addTask(String project, String description) {
-        List<com.codurance.training.tasks.Task> projectTasks = tasks.get(project);
+    void addTask(String project, String description) {
+        List<com.codurance.training.tasks.Task> projectTasks = projects.get(project);
         if (projectTasks == null) {
             throw new IllegalArgumentException("Unknown project: " + project);
         }
         projectTasks.add(new com.codurance.training.tasks.Task(nextId(), description, false));
     }
 
-    private void check(String idString) {
-        setDone(idString, true);
-    }
-
-    private void uncheck(String idString) {
-        setDone(idString, false);
-    }
-
-    private void setDone(String idString, boolean done) {
-        int id = Integer.parseInt(idString);
-        for (Map.Entry<String, List<com.codurance.training.tasks.Task>> project : tasks.entrySet()) {
-            if (Task.extracted(done, project, id)) return;
-        }
-        out.printf("Could not find a task with an ID of %d.", id);
-        out.println();
-    }
 
     private long nextId() {
         return ++lastId;
+    }
+
+    public Project getProjects() {
+        return projects;
     }
 }

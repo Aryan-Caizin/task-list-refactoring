@@ -14,16 +14,6 @@ public final class Task {
         this.done = done;
     }
 
-    public static boolean extracted(boolean done, Map.Entry<String, List<Task>> project, int id) {
-        for (Task task : project.getValue()) {
-            if (task.getId() == id) {
-                task.setDone(done);
-                return true;
-            }
-        }
-        return false;
-    }
-
     public long getId() {
         return id;
     }
@@ -39,4 +29,5 @@ public final class Task {
     public void setDone(boolean done) {
         this.done = done;
     }
+
 }
